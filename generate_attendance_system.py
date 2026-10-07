@@ -1,9 +1,14 @@
 """
 Hostel Housekeeping Attendance & Remuneration Generator
+Staff:
+1. Ms. Arputhamani - MBA Hostel
+2. Mr. R. Sakthivelan - Sports Hostel
+3. Ms. Revathi - Toulouse Arena
+
 Generates:
 1. Excel Workbook (.xlsx) with formulas for Attendance Sign-sheet, Digital Log, and Remuneration/Payroll calculation.
-2. Printable HTML Attendance Sign-in Register (Ready to print on A4).
-3. Printable HTML Remuneration Slip & Salary Register (Ready to print on A4).
+2. Printable HTML Attendance Sign-in Register (Ready to print on A4 Landscape).
+3. Printable HTML Remuneration Slip & Salary Register (Ready to print on A4 Portrait).
 """
 
 import calendar
@@ -13,7 +18,7 @@ import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
-def generate_excel_system(month, year, hostel_name, staff_list, output_path):
+def generate_excel_system(month, year, hostel_title, staff_list, output_path):
     wb = openpyxl.Workbook()
     
     # Define styles
@@ -23,12 +28,11 @@ def generate_excel_system(month, year, hostel_name, staff_list, output_path):
     font_bold = Font(name="Calibri", size=11, bold=True)
     font_regular = Font(name="Calibri", size=10)
     font_small = Font(name="Calibri", size=9)
-    font_kpi = Font(name="Calibri", size=14, bold=True, color="1F497D")
+    font_kpi = Font(name="Calibri", size=13, bold=True, color="1F497D")
     
     fill_navy = PatternFill(start_color="1F497D", end_color="1F497D", fill_type="solid")
     fill_steel = PatternFill(start_color="4F81BD", end_color="4F81BD", fill_type="solid")
     fill_light_blue = PatternFill(start_color="DCE6F1", end_color="DCE6F1", fill_type="solid")
-    fill_accent = PatternFill(start_color="F2F5F9", end_color="F2F5F9", fill_type="solid")
     fill_weekend = PatternFill(start_color="F2DCDB", end_color="F2DCDB", fill_type="solid") # Soft red/peach for Sunday
     fill_summary = PatternFill(start_color="EBF1DE", end_color="EBF1DE", fill_type="solid") # Soft green
     
@@ -61,14 +65,14 @@ def generate_excel_system(month, year, hostel_name, staff_list, output_path):
     ws_staff.title = "Staff_Master"
     ws_staff.views.sheetView[0].showGridLines = True
 
-    ws_staff["A1"] = f"{hostel_name}"
+    ws_staff["A1"] = f"{hostel_title}"
     ws_staff["A1"].font = font_title
     ws_staff["A2"] = f"Housekeeping Staff Directory & Master Settings | {month_name} {year}"
     ws_staff["A2"].font = font_subtitle
 
     headers_staff = [
-        "Staff ID", "Full Name", "Designation", "Contact No.",
-        "Monthly Base Wage (₹)", "Daily Wage Rate (₹)", "Weekly Off Day", "Payment Mode", "Bank / UPI Details"
+        "Staff ID", "Full Name", "Assigned Location / Hostel", "Designation",
+        "Monthly Base Wage (₹)", "Daily Wage Rate (₹)", "Weekly Off", "Payment Mode", "Bank / UPI Details"
     ]
     
     for col_idx, h in enumerate(headers_staff, 1):
@@ -81,10 +85,10 @@ def generate_excel_system(month, year, hostel_name, staff_list, output_path):
     for emp in staff_list:
         ws_staff.cell(row=row_idx, column=1, value=emp["id"]).alignment = Alignment(horizontal="center")
         ws_staff.cell(row=row_idx, column=2, value=emp["name"]).font = font_bold
-        ws_staff.cell(row=row_idx, column=3, value=emp["role"])
-        ws_staff.cell(row=row_idx, column=4, value=emp["phone"]).alignment = Alignment(horizontal="center")
+        ws_staff.cell(row=row_idx, column=3, value=emp["location"]).font = font_bold
+        ws_staff.cell(row=row_idx, column=4, value=emp["role"])
         ws_staff.cell(row=row_idx, column=5, value=emp["monthly_wage"]).number_format = "₹#,##0.00"
-        # Formula for daily wage rate = Monthly Wage / Total days in month
+        # Daily wage formula = Monthly Wage / Total days in month
         ws_staff.cell(row=row_idx, column=6, value=f"=E{row_idx}/{num_days}").number_format = "₹#,##0.00"
         ws_staff.cell(row=row_idx, column=7, value=emp["weekly_off"]).alignment = Alignment(horizontal="center")
         ws_staff.cell(row=row_idx, column=8, value=emp["payment_mode"]).alignment = Alignment(horizontal="center")
@@ -97,10 +101,10 @@ def generate_excel_system(month, year, hostel_name, staff_list, output_path):
     # Add quick notes & instructions
     ws_staff.cell(row=row_idx + 2, column=1, value="System Instructions:").font = font_bold
     notes = [
-        "1. Printable_Sign_Sheet: Print this sheet at the start of the month and pin to the housekeeping notice board.",
-        "2. Attendance_Log: Record daily attendance (P = Present, A = Absent, HD = Half Day, WO = Weekly Off, PL = Paid Leave).",
+        "1. Printable_Sign_Sheet: Print at the start of the month and display at respective hostel/arena housekeeping desks.",
+        "2. Attendance_Log: Daily attendance (P = Present, HD = Half Day, WO = Weekly Off, PL = Paid Leave, A = Absent).",
         "3. Monthly_Remuneration: Calculates gross and net wages automatically based on payable days.",
-        "4. Salary_Slips: Formatted payment receipts ready to print and sign upon wage disbursement."
+        "4. Ready for wage disbursement with signature acknowledgement."
     ]
     for i, note in enumerate(notes, row_idx + 3):
         ws_staff.cell(row=i, column=1, value=note).font = font_regular
@@ -112,6 +116,7 @@ def generate_excel_system(month, year, hostel_name, staff_list, output_path):
         ws_staff.column_dimensions[col_letter].width = max(max_len + 4, 12)
     ws_staff.column_dimensions["A"].width = 12
     ws_staff.column_dimensions["B"].width = 24
+    ws_staff.column_dimensions["C"].width = 22
     ws_staff.column_dimensions["I"].width = 30
 
     # ==========================================
@@ -120,7 +125,7 @@ def generate_excel_system(month, year, hostel_name, staff_list, output_path):
     ws_sign = wb.create_sheet(title="Printable_Sign_Sheet")
     ws_sign.views.sheetView[0].showGridLines = True
 
-    ws_sign["A1"] = hostel_name
+    ws_sign["A1"] = hostel_title
     ws_sign["A1"].font = font_title
     ws_sign["A2"] = f"DAILY HOUSEKEEPING ATTENDANCE & SIGNATURE REGISTER - {month_name.upper()} {year}"
     ws_sign["A2"].font = font_subtitle
@@ -132,7 +137,7 @@ def generate_excel_system(month, year, hostel_name, staff_list, output_path):
     col_cur = 3
     for emp in staff_list:
         ws_sign.merge_cells(start_row=4, start_column=col_cur, end_row=4, end_column=col_cur+2)
-        cell = ws_sign.cell(row=4, column=col_cur, value=f"{emp['name']} ({emp['id']})")
+        cell = ws_sign.cell(row=4, column=col_cur, value=f"{emp['name']} [{emp['location']}]")
         cell.alignment = Alignment(horizontal="center", vertical="center")
         cell.font = font_header
         cell.fill = fill_navy
@@ -214,8 +219,8 @@ def generate_excel_system(month, year, hostel_name, staff_list, output_path):
 
     # Supervisor Signature Row
     r_sig = r_summary + 3
-    ws_sign.cell(row=r_sig, column=2, value="Housekeeping Supervisor Signature: _______________________").font = font_bold
-    ws_sign.cell(row=r_sig, column=7, value="Hostel Warden / Manager Signature: _______________________").font = font_bold
+    ws_sign.cell(row=r_sig, column=2, value="Housekeeping Supervisor: _______________________").font = font_bold
+    ws_sign.cell(row=r_sig, column=7, value="Hostel Warden / Manager: _______________________").font = font_bold
 
     # Column dimensions for printable sign sheet
     ws_sign.column_dimensions["A"].width = 7
@@ -229,7 +234,7 @@ def generate_excel_system(month, year, hostel_name, staff_list, output_path):
     ws_matrix = wb.create_sheet(title="Attendance_Log")
     ws_matrix.views.sheetView[0].showGridLines = True
 
-    ws_matrix["A1"] = hostel_name
+    ws_matrix["A1"] = hostel_title
     ws_matrix["A1"].font = font_title
     ws_matrix["A2"] = f"Monthly Attendance Log & Calculation Matrix - {month_name} {year}"
     ws_matrix["A2"].font = font_subtitle
@@ -245,7 +250,7 @@ def generate_excel_system(month, year, hostel_name, staff_list, output_path):
     for c in ["B4", "C4", "D4", "E4", "F4"]:
         ws_matrix[c].font = font_small
 
-    headers_matrix = ["ID", "Staff Name", "Role"] + [str(d) for d in range(1, num_days + 1)] + [
+    headers_matrix = ["ID", "Staff Name", "Location"] + [str(d) for d in range(1, num_days + 1)] + [
         "Present (P)", "Half Day (HD)", "Weekly Off (WO)", "Paid Leave (PL)", "Absent (A)", "Total Payable Days"
     ]
 
@@ -286,12 +291,11 @@ def generate_excel_system(month, year, hostel_name, staff_list, output_path):
     for emp in staff_list:
         ws_matrix.cell(row=row_cur, column=1, value=emp["id"]).alignment = Alignment(horizontal="center")
         ws_matrix.cell(row=row_cur, column=2, value=emp["name"]).font = font_bold
-        ws_matrix.cell(row=row_cur, column=3, value=emp["role"])
+        ws_matrix.cell(row=row_cur, column=3, value=emp["location"])
 
         for c in range(1, 4):
             ws_matrix.cell(row=row_cur, column=c).border = thin_border
 
-        # Populate sample full attendance (Present on working days, WO on Sundays)
         for d in range(1, num_days + 1):
             day_date = datetime.date(year, month, d)
             col_pos = 3 + d
@@ -348,7 +352,7 @@ def generate_excel_system(month, year, hostel_name, staff_list, output_path):
     # Column widths for Attendance Matrix
     ws_matrix.column_dimensions["A"].width = 10
     ws_matrix.column_dimensions["B"].width = 22
-    ws_matrix.column_dimensions["C"].width = 18
+    ws_matrix.column_dimensions["C"].width = 20
     for d in range(1, num_days + 1):
         ws_matrix.column_dimensions[get_column_letter(3 + d)].width = 4.5
     for c in range(4 + num_days, len(headers_matrix) + 1):
@@ -360,13 +364,13 @@ def generate_excel_system(month, year, hostel_name, staff_list, output_path):
     ws_pay = wb.create_sheet(title="Monthly_Remuneration")
     ws_pay.views.sheetView[0].showGridLines = True
 
-    ws_pay["A1"] = hostel_name
+    ws_pay["A1"] = hostel_title
     ws_pay["A1"].font = font_title
     ws_pay["A2"] = f"HOUSEKEEPING REMUNERATION & WAGE DISBURSEMENT REGISTER - {month_name.upper()} {year}"
     ws_pay["A2"].font = font_subtitle
 
     headers_pay = [
-        "Staff ID", "Staff Name", "Role", "Monthly Base (₹)", f"Days in Month ({num_days})",
+        "Staff ID", "Staff Name", "Location", "Monthly Base (₹)", f"Days in Month ({num_days})",
         "Payable Days", "Earned Basic Wage (₹)", "Special / Overtime Allowance (₹)",
         "Gross Remuneration (₹)", "Advance / Deductions (₹)", "NET PAYABLE WAGE (₹)",
         "Payment Mode", "Staff Signature / Date"
@@ -384,7 +388,7 @@ def generate_excel_system(month, year, hostel_name, staff_list, output_path):
         staff_row_in_master = 4 + i
         staff_row_in_log = 7 + i
         
-        # ID, Name, Role
+        # ID, Name, Location
         ws_pay.cell(row=row_pay, column=1, value=f"=Staff_Master!A{staff_row_in_master}").alignment = Alignment(horizontal="center")
         ws_pay.cell(row=row_pay, column=2, value=f"=Staff_Master!B{staff_row_in_master}").font = font_bold
         ws_pay.cell(row=row_pay, column=3, value=f"=Staff_Master!C{staff_row_in_master}")
@@ -395,7 +399,7 @@ def generate_excel_system(month, year, hostel_name, staff_list, output_path):
         # Days in Month
         ws_pay.cell(row=row_pay, column=5, value=num_days).alignment = Alignment(horizontal="center")
         
-        # Payable Days from Attendance Log (Column index: 3 + num_days + 6 = 9 + num_days)
+        # Payable Days from Attendance Log
         payable_days_col_letter = get_column_letter(9 + num_days)
         ws_pay.cell(row=row_pay, column=6, value=f"=Attendance_Log!{payable_days_col_letter}{staff_row_in_log}").alignment = Alignment(horizontal="center")
         ws_pay.cell(row=row_pay, column=6).font = font_bold
@@ -403,14 +407,14 @@ def generate_excel_system(month, year, hostel_name, staff_list, output_path):
         # Earned Basic Wage = (Monthly Base / Days in Month) * Payable Days
         ws_pay.cell(row=row_pay, column=7, value=f"=(D{row_pay}/E{row_pay})*F{row_pay}").number_format = "₹#,##0.00"
 
-        # Overtime / Allowance (Default 0, editable)
+        # Overtime / Allowance (Default 0)
         ws_pay.cell(row=row_pay, column=8, value=0).number_format = "₹#,##0.00"
 
         # Gross Remuneration = Earned Basic + Overtime/Allowance
         ws_pay.cell(row=row_pay, column=9, value=f"=G{row_pay}+H{row_pay}").number_format = "₹#,##0.00"
         ws_pay.cell(row=row_pay, column=9).font = font_bold
 
-        # Advance / Deductions (Default 0, editable)
+        # Advance / Deductions (Default 0)
         ws_pay.cell(row=row_pay, column=10, value=0).number_format = "₹#,##0.00"
 
         # NET PAYABLE WAGE = Gross - Deductions
@@ -453,7 +457,7 @@ def generate_excel_system(month, year, hostel_name, staff_list, output_path):
     sig_row = row_pay + 3
     ws_pay.cell(row=sig_row, column=2, value="Prepared By: ___________________").font = font_bold
     ws_pay.cell(row=sig_row, column=6, value="Verified By (Supervisor): ___________________").font = font_bold
-    ws_pay.cell(row=sig_row, column=10, value="Approved By (Warden/Manager): ___________________").font = font_bold
+    ws_pay.cell(row=sig_row, column=10, value="Sanctioned By (Warden/Manager): ___________________").font = font_bold
 
     # Column dimensions for Remuneration Sheet
     for col in ws_pay.columns:
@@ -462,7 +466,7 @@ def generate_excel_system(month, year, hostel_name, staff_list, output_path):
         ws_pay.column_dimensions[col_letter].width = max(max_len + 4, 15)
     ws_pay.column_dimensions["A"].width = 10
     ws_pay.column_dimensions["B"].width = 22
-    ws_pay.column_dimensions["C"].width = 18
+    ws_pay.column_dimensions["C"].width = 20
     ws_pay.column_dimensions["K"].width = 20
     ws_pay.column_dimensions["M"].width = 24
 
@@ -471,14 +475,13 @@ def generate_excel_system(month, year, hostel_name, staff_list, output_path):
     print(f"Excel workbook successfully created at: {output_path}")
 
 
-def generate_printable_html(month, year, hostel_name, staff_list, out_html_attendance, out_html_payslip):
+def generate_printable_html(month, year, hostel_title, staff_list, out_html_attendance, out_html_payslip):
     num_days = calendar.monthrange(year, month)[1]
     month_name = calendar.month_name[month]
 
     # 1. Printable Attendance Register HTML
     days_header_html = "".join([f"<th style='width: 28px; text-align: center;'>{d}</th>" for d in range(1, num_days + 1)])
     
-    # Days subheader (weekday)
     days_sub_html = ""
     for d in range(1, num_days + 1):
         day_date = datetime.date(year, month, d)
@@ -489,7 +492,6 @@ def generate_printable_html(month, year, hostel_name, staff_list, out_html_atten
 
     rows_html = ""
     for emp in staff_list:
-        # Row 1: In Signature
         in_cells = ""
         out_cells = ""
         for d in range(1, num_days + 1):
@@ -506,8 +508,8 @@ def generate_printable_html(month, year, hostel_name, staff_list, out_html_atten
         <tr>
             <td rowspan="2" style="font-weight: bold; text-align: center; vertical-align: middle; background-color: #fafafa;">{emp['id']}</td>
             <td rowspan="2" style="font-weight: bold; vertical-align: middle; background-color: #fafafa;">
-                <div style="font-size: 13px;">{emp['name']}</div>
-                <div style="font-size: 11px; color: #666;">{emp['role']}</div>
+                <div style="font-size: 13px; color: #0f172a;">{emp['name']}</div>
+                <div style="font-size: 11px; color: #1e40af; font-weight: 600;">{emp['location']}</div>
             </td>
             <td style="font-size: 11px; text-align: center; font-weight: 600; background: #eef2f7;">Morning / In</td>
             {in_cells}
@@ -611,12 +613,12 @@ def generate_printable_html(month, year, hostel_name, staff_list, out_html_atten
 </div>
 
 <div class="header">
-    <h1>{hostel_name}</h1>
+    <h1>{hostel_title}</h1>
     <h2>Monthly Housekeeping Staff Attendance Register | <strong>{month_name.upper()} {year}</strong></h2>
 </div>
 
 <div class="meta-bar">
-    <span>Department: Housekeeping & Facility Management</span>
+    <span>Locations Covered: MBA Hostel &bull; Sports Hostel &bull; Toulouse Arena</span>
     <span>Total Days in Month: {num_days} Days</span>
     <span>Duty Timing: General Shift (7:00 AM - 4:00 PM)</span>
 </div>
@@ -625,7 +627,7 @@ def generate_printable_html(month, year, hostel_name, staff_list, out_html_atten
     <thead>
         <tr>
             <th rowspan="2" style="width: 55px; text-align: center;">ID</th>
-            <th rowspan="2" style="width: 140px; text-align: left;">Staff Name & Role</th>
+            <th rowspan="2" style="width: 170px; text-align: left;">Staff Name & Location</th>
             <th rowspan="2" style="width: 75px; text-align: center;">Shift</th>
             {days_header_html}
             <th rowspan="2" style="width: 50px; text-align: center;">Present Days</th>
@@ -669,7 +671,6 @@ def generate_printable_html(month, year, hostel_name, staff_list, out_html_atten
 
     for emp in staff_list:
         monthly_wage = emp["monthly_wage"]
-        # Standard calculation assumption (Full month working / 4 weekly offs included)
         payable_days = num_days
         per_day_rate = monthly_wage / num_days
         earned_wage = monthly_wage
@@ -683,7 +684,7 @@ def generate_printable_html(month, year, hostel_name, staff_list, out_html_atten
         <tr>
             <td style="text-align: center; font-weight: bold;">{emp['id']}</td>
             <td style="font-weight: bold;">{emp['name']}</td>
-            <td>{emp['role']}</td>
+            <td style="color: #1e40af; font-weight: 600;">{emp['location']}</td>
             <td style="text-align: right;">₹{monthly_wage:,.2f}</td>
             <td style="text-align: center;">{num_days}</td>
             <td style="text-align: center; font-weight: bold; background: #f0f7ff;">{payable_days}</td>
@@ -696,11 +697,10 @@ def generate_printable_html(month, year, hostel_name, staff_list, out_html_atten
         </tr>
         """
 
-        # Payslip card
         slips_html += f"""
         <div class="payslip-card">
             <div class="slip-header">
-                <h3>{hostel_name}</h3>
+                <h3>{hostel_title}</h3>
                 <p>Housekeeping Remuneration Voucher | <strong>{month_name} {year}</strong></p>
             </div>
             
@@ -708,11 +708,11 @@ def generate_printable_html(month, year, hostel_name, staff_list, out_html_atten
                 <div><strong>Staff ID:</strong> {emp['id']}</div>
                 <div><strong>Month / Year:</strong> {month_name} {year}</div>
                 <div><strong>Staff Name:</strong> {emp['name']}</div>
-                <div><strong>Payable Days:</strong> {payable_days} / {num_days} Days</div>
+                <div><strong>Assigned Location:</strong> {emp['location']}</div>
                 <div><strong>Designation:</strong> {emp['role']}</div>
+                <div><strong>Payable Days:</strong> {payable_days} / {num_days} Days</div>
                 <div><strong>Payment Mode:</strong> {emp['payment_mode']}</div>
-                <div><strong>Contact:</strong> {emp['phone']}</div>
-                <div><strong>A/c or UPI:</strong> {emp['account_details']}</div>
+                <div><strong>Bank / UPI Info:</strong> {emp['account_details']}</div>
             </div>
 
             <table class="slip-calc-table">
@@ -738,7 +738,7 @@ def generate_printable_html(month, year, hostel_name, staff_list, out_html_atten
                         <td style="text-align: right;">₹0.00</td>
                     </tr>
                     <tr>
-                        <td>Overtime / Festival Allowance</td>
+                        <td>Overtime / Special Allowance</td>
                         <td style="text-align: right;">₹{ot_allowance:,.2f}</td>
                         <td>Other Deductions</td>
                         <td style="text-align: right;">₹0.00</td>
@@ -903,7 +903,7 @@ def generate_printable_html(month, year, hostel_name, staff_list, out_html_atten
 </div>
 
 <div class="header">
-    <h1>{hostel_name}</h1>
+    <h1>{hostel_title}</h1>
     <h2>Monthly Housekeeping Wage Disbursement Register | <strong>{month_name.upper()} {year}</strong></h2>
 </div>
 
@@ -912,7 +912,7 @@ def generate_printable_html(month, year, hostel_name, staff_list, out_html_atten
         <tr>
             <th>ID</th>
             <th>Staff Name</th>
-            <th>Designation</th>
+            <th>Location</th>
             <th>Monthly Base</th>
             <th>Days</th>
             <th>Payable</th>
@@ -958,39 +958,42 @@ if __name__ == "__main__":
     current_month = now.month
     current_year = now.year
 
-    hostel_title = "SUNSHINE HOSTEL & RESIDENCY"
+    hostel_title = "HOSTEL & FACILITY HOUSEKEEPING MANAGEMENT"
 
-    # Default housekeeping staff team (3 members)
-    default_staff = [
+    # Specific 3 housekeeping staff members
+    staff_members = [
         {
             "id": "HK-01",
-            "name": "Ramesh Kumar",
-            "role": "Head Housekeeper / Floors",
-            "phone": "+91 98765 43210",
-            "monthly_wage": 12000,
+            "name": "Ms. Arputhamani",
+            "location": "MBA Hostel",
+            "role": "Housekeeper / MBA Hostel",
+            "phone": "-",
+            "monthly_wage": 11000,
             "weekly_off": "Sunday",
-            "payment_mode": "Bank Transfer / UPI",
-            "account_details": "A/C: 987654321012, IFSC: SBIN0001234"
+            "payment_mode": "Bank / Cash",
+            "account_details": "MBA Hostel Desk"
         },
         {
             "id": "HK-02",
-            "name": "Sunita Devi",
-            "role": "Housekeeper / Rooms & Corridors",
-            "phone": "+91 98765 43211",
-            "monthly_wage": 10500,
+            "name": "Mr. R. Sakthivelan",
+            "location": "Sports Hostel",
+            "role": "Housekeeper / Sports Hostel",
+            "phone": "-",
+            "monthly_wage": 11000,
             "weekly_off": "Sunday",
-            "payment_mode": "Cash / Hand",
-            "account_details": "Cash Payment Register"
+            "payment_mode": "Bank / Cash",
+            "account_details": "Sports Hostel Desk"
         },
         {
             "id": "HK-03",
-            "name": "Anil Sharma",
-            "role": "Housekeeper / Washrooms & Common Areas",
-            "phone": "+91 98765 43212",
-            "monthly_wage": 10500,
+            "name": "Ms. Revathi",
+            "location": "Toulouse Arena",
+            "role": "Housekeeper / Toulouse Arena",
+            "phone": "-",
+            "monthly_wage": 11000,
             "weekly_off": "Sunday",
-            "payment_mode": "UPI",
-            "account_details": "UPI ID: anilsharma@okaxis"
+            "payment_mode": "Bank / Cash",
+            "account_details": "Toulouse Arena Desk"
         }
     ]
 
@@ -999,6 +1002,6 @@ if __name__ == "__main__":
     html_att_path = os.path.join(base_dir, "Printable_Attendance_Register.html")
     html_pay_path = os.path.join(base_dir, "Printable_Remuneration_and_Payslips.html")
 
-    generate_excel_system(current_month, current_year, hostel_title, default_staff, excel_path)
-    generate_printable_html(current_month, current_year, hostel_title, default_staff, html_att_path, html_pay_path)
-    print("All files generated successfully!")
+    generate_excel_system(current_month, current_year, hostel_title, staff_members, excel_path)
+    generate_printable_html(current_month, current_year, hostel_title, staff_members, html_att_path, html_pay_path)
+    print("Files successfully generated for Ms. Arputhamani, Mr. R. Sakthivelan, and Ms. Revathi!")
