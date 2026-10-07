@@ -453,12 +453,6 @@ def generate_excel_system(month, year, hostel_title, staff_list, output_path):
     for col_c in range(1, 14):
         ws_pay.cell(row=row_pay, column=col_c).border = double_bottom_border
 
-    # Signatures at bottom
-    sig_row = row_pay + 3
-    ws_pay.cell(row=sig_row, column=2, value="Prepared By: ___________________").font = font_bold
-    ws_pay.cell(row=sig_row, column=6, value="Verified By (Supervisor): ___________________").font = font_bold
-    ws_pay.cell(row=sig_row, column=10, value="Sanctioned By (Warden/Manager): ___________________").font = font_bold
-
     # Column dimensions for Remuneration Sheet
     for col in ws_pay.columns:
         max_len = max(len(str(cell.value or '')) for cell in col)
