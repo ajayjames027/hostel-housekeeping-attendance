@@ -10,7 +10,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- SheetJS for client-side Excel export -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <style>
+    <style id="printStyleSheet">
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
@@ -18,13 +18,26 @@
         @media print {
             .no-print { display: none !important; }
             .print-only { display: block !important; }
-            body { background: white !important; padding: 0 !important; }
+            body { 
+                background: white !important; 
+                padding: 0 !important; 
+                margin: 0 !important;
+                color: #000 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
             .print-landscape {
                 page-break-after: always;
             }
             @page {
-                size: A4 landscape;
-                margin: 8mm;
+                size: legal landscape;
+                margin: 6mm 8mm;
+            }
+            table, th, td {
+                border-color: #222 !important;
+            }
+            .sign-row-cell {
+                height: 26px !important;
             }
         }
         .custom-scrollbar::-webkit-scrollbar {
@@ -53,7 +66,18 @@
                     </div>
                 </div>
 
-                <div class="flex flex-wrap items-center gap-3">
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <!-- Paper Size Selector for High Clarity Printing -->
+                    <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700">
+                        <span class="text-[11px] text-slate-400 px-1 font-medium flex items-center gap-1">
+                            <i data-lucide="printer" class="w-3.5 h-3.5 text-amber-400"></i> Paper:
+                        </span>
+                        <select id="selectPaperSize" onchange="changePaperSize(this.value)" class="bg-slate-800 text-amber-300 text-xs font-semibold px-2 py-1.5 rounded focus:outline-none focus:ring-1 focus:ring-amber-400 cursor-pointer">
+                            <option value="legal" selected>📜 Legal Paper (Spacious & Clear)</option>
+                            <option value="a4">📄 A4 Paper (Compact)</option>
+                        </select>
+                    </div>
+
                     <!-- Month & Year Selector -->
                     <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700">
                         <select id="selectMonth" class="bg-slate-800 text-white text-xs font-medium px-2.5 py-1.5 rounded focus:outline-none focus:ring-1 focus:ring-indigo-400 cursor-pointer">
@@ -78,11 +102,11 @@
                     </div>
 
                     <!-- Action Buttons -->
-                    <button onclick="window.print()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow-sm transition">
-                        <i data-lucide="printer" class="w-4 h-4"></i> Print Current View
+                    <button onclick="window.print()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow-sm transition">
+                        <i data-lucide="printer" class="w-4 h-4"></i> Print Sheet
                     </button>
-                    <button onclick="exportToExcel()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow-sm transition">
-                        <i data-lucide="download" class="w-4 h-4"></i> Export Excel (.xlsx)
+                    <button onclick="exportToExcel()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow-sm transition">
+                        <i data-lucide="download" class="w-4 h-4"></i> Export Excel
                     </button>
                 </div>
             </div>
@@ -168,19 +192,6 @@
                 <!-- Legend -->
                 <div class="mt-4 p-3 bg-slate-50 border border-slate-300 rounded text-xs flex flex-wrap gap-4 justify-between items-center text-slate-700">
                     <div><strong>Attendance Codes:</strong> P = Present (1.0) | HD = Half Day (0.5) | WO = Weekly Off (1.0 Paid) | PL = Paid Leave (1.0) | A = Absent (Unpaid)</div>
-                </div>
-
-                <!-- Signatures -->
-                <div class="mt-8 pt-6 border-t border-slate-300 flex justify-between items-end text-xs font-semibold text-slate-800">
-                    <div class="text-center w-52">
-                        <div class="border-t border-slate-700 pt-2">Housekeeping Supervisor</div>
-                    </div>
-                    <div class="text-center w-52">
-                        <div class="border-t border-slate-700 pt-2">Hostel Warden / Manager</div>
-                    </div>
-                    <div class="text-center w-52">
-                        <div class="border-t border-slate-700 pt-2">Estate / Accounts Officer</div>
-                    </div>
                 </div>
             </div>
         </section>
@@ -518,15 +529,53 @@
             lucide.createIcons();
         }
 
+        function changePaperSize(size) {
+            const styleEl = document.getElementById("printStyleSheet");
+            if (size === "legal") {
+                styleEl.innerHTML = `
+                    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+                    body { font-family: 'Inter', sans-serif; }
+                    @media print {
+                        .no-print { display: none !important; }
+                        .print-only { display: block !important; }
+                        body { background: white !important; padding: 0 !important; margin: 0 !important; color: #000 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                        .print-landscape { page-break-after: always; }
+                        @page { size: legal landscape; margin: 6mm 8mm; }
+                        table, th, td { border-color: #222 !important; }
+                        .sign-cell { height: 26px !important; }
+                    }
+                    .custom-scrollbar::-webkit-scrollbar { height: 8px; width: 8px; }
+                    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
+                `;
+            } else {
+                styleEl.innerHTML = `
+                    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+                    body { font-family: 'Inter', sans-serif; }
+                    @media print {
+                        .no-print { display: none !important; }
+                        .print-only { display: block !important; }
+                        body { background: white !important; padding: 0 !important; margin: 0 !important; color: #000 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                        .print-landscape { page-break-after: always; }
+                        @page { size: A4 landscape; margin: 4mm 6mm; }
+                        table, th, td { border-color: #222 !important; }
+                        .sign-cell { height: 18px !important; }
+                        table { font-size: 10px !important; }
+                    }
+                    .custom-scrollbar::-webkit-scrollbar { height: 8px; width: 8px; }
+                    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
+                `;
+            }
+        }
+
         // ==========================================
         // 1. RENDER PRINTABLE SIGN-IN REGISTER
         // ==========================================
         function renderPrintableSignInSheet(totalDays) {
-            // Update table headers with staff names
+            // Update table headers with staff names and assigned locations
             state.staff.forEach((emp, idx) => {
                 const headerEl = document.querySelector(`.staff-header-${idx + 1}`);
                 if (headerEl) {
-                    headerEl.innerHTML = `<strong>${emp.name}</strong><br><span class="text-[10px] text-slate-300">(${emp.id} &bull; ${emp.role.split('/')[0]})</span>`;
+                    headerEl.innerHTML = `<strong>${emp.name}</strong><br><span class="text-[11px] text-amber-200 font-semibold">[${emp.location}]</span>`;
                 }
             });
 
@@ -543,23 +592,23 @@
                 state.staff.forEach(emp => {
                     if (isSunday) {
                         staffCells += `
-                            <td class="border border-slate-300 px-1 py-1.5 text-center text-[10px] text-rose-600 bg-rose-50">OFF</td>
-                            <td class="border border-slate-300 px-1 py-1.5 text-center text-[10px] text-rose-600 bg-rose-50">OFF</td>
-                            <td class="border border-slate-300 px-1 py-1.5 text-center text-[10px] font-bold text-rose-600 bg-rose-50">WO</td>
+                            <td class="border border-slate-400 sign-cell px-1 py-1 text-center text-[10px] text-rose-600 bg-rose-50 font-bold">OFF</td>
+                            <td class="border border-slate-400 sign-cell px-1 py-1 text-center text-[10px] text-rose-600 bg-rose-50 font-bold">OFF</td>
+                            <td class="border border-slate-400 sign-cell px-1 py-1 text-center text-[10px] font-bold text-rose-600 bg-rose-50">WO</td>
                         `;
                     } else {
                         staffCells += `
-                            <td class="border border-slate-300 h-7 text-center"></td>
-                            <td class="border border-slate-300 h-7 text-center"></td>
-                            <td class="border border-slate-300 h-7 text-center"></td>
+                            <td class="border border-slate-400 sign-cell text-center"></td>
+                            <td class="border border-slate-400 sign-cell text-center"></td>
+                            <td class="border border-slate-400 sign-cell text-center"></td>
                         `;
                     }
                 });
 
                 rowsHtml += `
                     <tr class="${rowBg}">
-                        <td class="border border-slate-400 px-1 py-1 text-center font-bold">${d}</td>
-                        <td class="border border-slate-400 px-1 py-1 text-center">${dayName}</td>
+                        <td class="border border-slate-500 px-1 py-1 text-center font-bold">${d}</td>
+                        <td class="border border-slate-500 px-1 py-1 text-center font-semibold">${dayName}</td>
                         ${staffCells}
                     </tr>
                 `;

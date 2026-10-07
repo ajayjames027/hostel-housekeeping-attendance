@@ -217,11 +217,6 @@ def generate_excel_system(month, year, hostel_title, staff_list, output_path):
             ws_sign.cell(row=r_summary, column=c_idx + col_off).border = dark_border
         c_idx += 3
 
-    # Supervisor Signature Row
-    r_sig = r_summary + 3
-    ws_sign.cell(row=r_sig, column=2, value="Housekeeping Supervisor: _______________________").font = font_bold
-    ws_sign.cell(row=r_sig, column=7, value="Hostel Warden / Manager: _______________________").font = font_bold
-
     # Column dimensions for printable sign sheet
     ws_sign.column_dimensions["A"].width = 7
     ws_sign.column_dimensions["B"].width = 8
@@ -643,12 +638,6 @@ def generate_printable_html(month, year, hostel_title, staff_list, out_html_atte
     <span><strong>WO</strong> = Weekly Off</span>
     <span><strong>PL</strong> = Approved Paid Leave</span>
     <span><strong>A</strong> = Absent (Unpaid)</span>
-</div>
-
-<div class="signatures">
-    <div class="sig-box">Housekeeping Supervisor</div>
-    <div class="sig-box">Hostel Warden / Estate Officer</div>
-    <div class="sig-box">Accounts / Admin Approval</div>
 </div>
 
 </body>
