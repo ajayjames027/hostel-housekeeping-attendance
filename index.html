@@ -181,9 +181,9 @@
                         <tfoot>
                             <tr class="bg-slate-100 font-bold">
                                 <td colspan="2" class="border border-slate-700 px-2 py-3 text-center">Total Present Days</td>
-                                <td colspan="3" class="border border-slate-700 px-2 py-3 text-center text-indigo-800 font-bold staff-total-pres-1">_____ Days</td>
-                                <td colspan="3" class="border border-slate-700 px-2 py-3 text-center text-indigo-800 font-bold staff-total-pres-2">_____ Days</td>
-                                <td colspan="3" class="border border-slate-700 px-2 py-3 text-center text-indigo-800 font-bold staff-total-pres-3">_____ Days</td>
+                                <td colspan="3" class="border border-slate-700 px-2 py-3 text-center text-slate-700 font-medium">________________ Days</td>
+                                <td colspan="3" class="border border-slate-700 px-2 py-3 text-center text-slate-700 font-medium">________________ Days</td>
+                                <td colspan="3" class="border border-slate-700 px-2 py-3 text-center text-slate-700 font-medium">________________ Days</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -759,10 +759,6 @@
                 totalGross += grossPay;
                 totalDed += deduction;
                 totalNet += netPayable;
-
-                // Sync with Printable Sign-in sheet footer
-                const totPresEl = document.querySelector(`.staff-total-pres-${index + 1}`);
-                if (totPresEl) totPresEl.innerText = `${payableDays.toFixed(1)} Days`;
 
                 rowsHtml += `
                     <tr class="hover:bg-slate-50 transition font-medium">

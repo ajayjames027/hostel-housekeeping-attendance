@@ -208,8 +208,7 @@ def generate_excel_system(month, year, hostel_title, staff_list, output_path):
     c_idx = 3
     for _ in staff_list:
         ws_sign.merge_cells(start_row=r_summary, start_column=c_idx, end_row=r_summary, end_column=c_idx+2)
-        stat_col_letter = get_column_letter(c_idx + 2)
-        c_val = ws_sign.cell(row=r_summary, column=c_idx, value=f'=COUNTIF({stat_col_letter}6:{stat_col_letter}{5+num_days}, "P") + COUNTIF({stat_col_letter}6:{stat_col_letter}{5+num_days}, "HD")*0.5')
+        c_val = ws_sign.cell(row=r_summary, column=c_idx, value="________________ Days")
         c_val.font = font_bold
         c_val.fill = fill_summary
         c_val.alignment = Alignment(horizontal="center", vertical="center")
