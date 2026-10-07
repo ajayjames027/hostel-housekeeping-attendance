@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hostel Housekeeping Attendance & Remuneration Portal</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- SheetJS for client-side Excel export -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white !important; padding: 0 !important; }
+            .print-landscape {
+                page-break-after: always;
+            }
+            @page {
+                size: A4 landscape;
+                margin: 8mm;
+            }
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+    <!-- Top Navigation Bar (No Print) -->
+    <header class="no-print bg-slate-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-md">
+                        <i data-lucide="building-2" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h1 id="topNavHostelName" class="font-bold text-lg leading-tight">Sunshine Hostel & Residency</h1>
+                        <p class="text-xs text-slate-400">Housekeeping Attendance & Payroll Management System</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3">
+                    <!-- Month & Year Selector -->
+                    <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700">
+                        <select id="selectMonth" class="bg-slate-800 text-white text-xs font-medium px-2.5 py-1.5 rounded focus:outline-none focus:ring-1 focus:ring-indigo-400 cursor-pointer">
+                            <option value="0">January</option>
+                            <option value="1">February</option>
+                            <option value="2">March</option>
+                            <option value="3">April</option>
+                            <option value="4">May</option>
+                            <option value="5">June</option>
+                            <option value="6">July</option>
+                            <option value="7">August</option>
+                            <option value="8">September</option>
+                            <option value="9">October</option>
+                            <option value="10">November</option>
+                            <option value="11">December</option>
+                        </select>
+                        <select id="selectYear" class="bg-slate-800 text-white text-xs font-medium px-2 py-1.5 rounded focus:outline-none focus:ring-1 focus:ring-indigo-400 cursor-pointer ml-1">
+                            <option value="2025">2025</option>
+                            <option value="2026" selected>2026</option>
+                            <option value="2027">2027</option>
+                        </select>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <button onclick="window.print()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow-sm transition">
+                        <i data-lucide="printer" class="w-4 h-4"></i> Print Current View
+                    </button>
+                    <button onclick="exportToExcel()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow-sm transition">
+                        <i data-lucide="download" class="w-4 h-4"></i> Export Excel (.xlsx)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <nav class="flex space-x-2 sm:space-x-4 mt-4 overflow-x-auto pb-1 text-sm border-t border-slate-800 pt-3">
+                <button onclick="switchTab('signin_sheet')" id="tab-btn-signin_sheet" class="tab-btn flex items-center gap-2 px-3 py-2 font-medium rounded-lg transition bg-indigo-600 text-white">
+                    <i data-lucide="clipboard-check" class="w-4 h-4"></i> 1. Printable Sign-in Sheet
+                </button>
+                <button onclick="switchTab('attendance_matrix')" id="tab-btn-attendance_matrix" class="tab-btn flex items-center gap-2 px-3 py-2 font-medium rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition">
+                    <i data-lucide="calendar" class="w-4 h-4"></i> 2. Digital Attendance Tracker
+                </button>
+                <button onclick="switchTab('payroll')" id="tab-btn-payroll" class="tab-btn flex items-center gap-2 px-3 py-2 font-medium rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition">
+                    <i data-lucide="indian-rupee" class="w-4 h-4"></i> 3. Monthly Remuneration
+                </button>
+                <button onclick="switchTab('payslips')" id="tab-btn-payslips" class="tab-btn flex items-center gap-2 px-3 py-2 font-medium rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition">
+                    <i data-lucide="file-text" class="w-4 h-4"></i> 4. Salary Slips / Vouchers
+                </button>
+                <button onclick="switchTab('staff')" id="tab-btn-staff" class="tab-btn flex items-center gap-2 px-3 py-2 font-medium rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition">
+                    <i data-lucide="users" class="w-4 h-4"></i> 5. Staff & Settings
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6">
+
+        <!-- ========================================================================= -->
+        <!-- TAB 1: PRINTABLE PHYSICAL SIGN-IN REGISTER -->
+        <!-- ========================================================================= -->
+        <section id="tab-signin_sheet" class="tab-content block">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <!-- Sheet Header -->
+                <div class="text-center pb-4 mb-4 border-b-2 border-slate-800">
+                    <h2 class="text-2xl font-black text-slate-900 uppercase tracking-wide hostel-title-display">Sunshine Hostel & Residency</h2>
+                    <h3 class="text-sm font-semibold text-slate-600 uppercase tracking-wider mt-1">
+                        Daily Housekeeping Attendance & Signature Register — <span class="current-month-display text-indigo-700">October 2026</span>
+                    </h3>
+                    <div class="flex justify-between items-center text-xs text-slate-500 mt-2">
+                        <span><strong>Department:</strong> Housekeeping & Facilities</span>
+                        <span><strong>Total Days:</strong> <span class="total-days-display">31</span> Days</span>
+                        <span><strong>Shift Hours:</strong> 07:00 AM – 04:00 PM</span>
+                    </div>
+                </div>
+
+                <!-- Printable Table -->
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full border-collapse border border-slate-700 text-xs">
+                        <thead>
+                            <tr class="bg-slate-900 text-white">
+                                <th rowspan="2" class="border border-slate-700 px-2 py-2 w-12 text-center">Date</th>
+                                <th rowspan="2" class="border border-slate-700 px-2 py-2 w-14 text-center">Day</th>
+                                <th colspan="3" class="border border-slate-700 px-2 py-1 text-center staff-header-1">Staff 1</th>
+                                <th colspan="3" class="border border-slate-700 px-2 py-1 text-center staff-header-2">Staff 2</th>
+                                <th colspan="3" class="border border-slate-700 px-2 py-1 text-center staff-header-3">Staff 3</th>
+                            </tr>
+                            <tr class="bg-slate-100 text-slate-800 font-semibold">
+                                <th class="border border-slate-400 px-1 py-1 w-20 text-center">In Sign</th>
+                                <th class="border border-slate-400 px-1 py-1 w-20 text-center">Out Sign</th>
+                                <th class="border border-slate-400 px-1 py-1 w-14 text-center">Status</th>
+                                <th class="border border-slate-400 px-1 py-1 w-20 text-center">In Sign</th>
+                                <th class="border border-slate-400 px-1 py-1 w-20 text-center">Out Sign</th>
+                                <th class="border border-slate-400 px-1 py-1 w-14 text-center">Status</th>
+                                <th class="border border-slate-400 px-1 py-1 w-20 text-center">In Sign</th>
+                                <th class="border border-slate-400 px-1 py-1 w-20 text-center">Out Sign</th>
+                                <th class="border border-slate-400 px-1 py-1 w-14 text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="printableSignInTableBody">
+                            <!-- Dynamic Day Rows Rendered by JS -->
+                        </tbody>
+                        <tfoot>
+                            <tr class="bg-slate-100 font-bold">
+                                <td colspan="2" class="border border-slate-700 px-2 py-3 text-center">Total Present Days</td>
+                                <td colspan="3" class="border border-slate-700 px-2 py-3 text-center text-indigo-800 font-bold staff-total-pres-1">_____ Days</td>
+                                <td colspan="3" class="border border-slate-700 px-2 py-3 text-center text-indigo-800 font-bold staff-total-pres-2">_____ Days</td>
+                                <td colspan="3" class="border border-slate-700 px-2 py-3 text-center text-indigo-800 font-bold staff-total-pres-3">_____ Days</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <!-- Legend -->
+                <div class="mt-4 p-3 bg-slate-50 border border-slate-300 rounded text-xs flex flex-wrap gap-4 justify-between items-center text-slate-700">
+                    <div><strong>Attendance Codes:</strong> P = Present (1.0) | HD = Half Day (0.5) | WO = Weekly Off (1.0 Paid) | PL = Paid Leave (1.0) | A = Absent (Unpaid)</div>
+                </div>
+
+                <!-- Signatures -->
+                <div class="mt-8 pt-6 border-t border-slate-300 flex justify-between items-end text-xs font-semibold text-slate-800">
+                    <div class="text-center w-52">
+                        <div class="border-t border-slate-700 pt-2">Housekeeping Supervisor</div>
+                    </div>
+                    <div class="text-center w-52">
+                        <div class="border-t border-slate-700 pt-2">Hostel Warden / Manager</div>
+                    </div>
+                    <div class="text-center w-52">
+                        <div class="border-t border-slate-700 pt-2">Estate / Accounts Officer</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 2: DIGITAL ATTENDANCE MATRIX -->
+        <!-- ========================================================================= -->
+        <section id="tab-attendance_matrix" class="tab-content hidden">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 mb-4 border-b border-slate-200">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Digital Monthly Attendance Tracker</h2>
+                        <p class="text-xs text-slate-500">Click any cell to toggle attendance status: <span class="font-bold text-emerald-700">P</span> (Present) ➔ <span class="font-bold text-amber-600">HD</span> (Half Day) ➔ <span class="font-bold text-purple-600">WO</span> (Weekly Off) ➔ <span class="font-bold text-blue-600">PL</span> (Paid Leave) ➔ <span class="font-bold text-rose-600">A</span> (Absent)</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="markAllPresent()" class="px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-300 transition">
+                            Mark All Working Days as Present (P)
+                        </button>
+                        <button onclick="resetAttendance()" class="px-3 py-1.5 text-xs font-medium bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg border border-rose-200 transition">
+                            Reset Month
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Matrix Table -->
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full border-collapse border border-slate-300 text-xs text-center">
+                        <thead>
+                            <tr class="bg-slate-900 text-white">
+                                <th class="border border-slate-700 px-2 py-2 text-left sticky left-0 bg-slate-900 z-10 w-44">Staff Name</th>
+                                <th class="border border-slate-700 px-2 py-2 w-28 text-left">Role</th>
+                                <th id="matrixDayHeaders" colspan="31" class="border border-slate-700 py-1">Days of Month</th>
+                                <th class="border border-slate-700 px-2 py-2 bg-emerald-900 text-white">P</th>
+                                <th class="border border-slate-700 px-2 py-2 bg-amber-900 text-white">HD</th>
+                                <th class="border border-slate-700 px-2 py-2 bg-purple-900 text-white">WO</th>
+                                <th class="border border-slate-700 px-2 py-2 bg-blue-900 text-white">PL</th>
+                                <th class="border border-slate-700 px-2 py-2 bg-rose-900 text-white">A</th>
+                                <th class="border border-slate-700 px-3 py-2 bg-indigo-950 text-white font-bold">Payable Days</th>
+                            </tr>
+                            <tr id="matrixSubHeaderDays" class="bg-slate-100 text-slate-700 font-semibold">
+                                <!-- Day numbers & weekdays -->
+                            </tr>
+                        </thead>
+                        <tbody id="digitalMatrixTableBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-4 flex items-center justify-between text-xs text-slate-500 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                    <div class="flex items-center gap-4">
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> <strong>P:</strong> Full Day (1.0)</span>
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> <strong>HD:</strong> Half Day (0.5)</span>
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-purple-500 inline-block"></span> <strong>WO:</strong> Weekly Off (1.0 Paid)</span>
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> <strong>PL:</strong> Paid Leave (1.0 Paid)</span>
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span> <strong>A:</strong> Absent (0.0 Unpaid)</span>
+                    </div>
+                    <span class="font-medium text-indigo-700">💾 Attendance automatically saves to browser storage</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 3: MONTHLY REMUNERATION & PAYROLL -->
+        <!-- ========================================================================= -->
+        <section id="tab-payroll" class="tab-content hidden">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <div class="text-center pb-4 mb-6 border-b-2 border-slate-800">
+                    <h2 class="text-2xl font-black text-slate-900 uppercase tracking-wide hostel-title-display">Sunshine Hostel & Residency</h2>
+                    <h3 class="text-sm font-semibold text-slate-600 uppercase tracking-wider mt-1">
+                        Monthly Housekeeping Remuneration & Wage Disbursement Register — <span class="current-month-display text-indigo-700">October 2026</span>
+                    </h3>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4">
+                        <div class="text-xs font-semibold text-indigo-700 uppercase">Total Active Staff</div>
+                        <div class="text-2xl font-bold text-slate-900 mt-1">3 Housekeepers</div>
+                        <div class="text-xs text-indigo-600 mt-1">All shifts covered</div>
+                    </div>
+                    <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-4">
+                        <div class="text-xs font-semibold text-emerald-700 uppercase">Total Net Remuneration</div>
+                        <div id="payrollCardTotalNet" class="text-2xl font-bold text-emerald-900 mt-1">₹33,000.00</div>
+                        <div class="text-xs text-emerald-700 mt-1">Calculated for current month</div>
+                    </div>
+                    <div class="bg-amber-50 border border-amber-100 rounded-xl p-4">
+                        <div class="text-xs font-semibold text-amber-700 uppercase">Month Details</div>
+                        <div class="text-2xl font-bold text-slate-900 mt-1"><span class="total-days-display">31</span> Days</div>
+                        <div class="text-xs text-amber-700 mt-1">Full pro-rata wage calculation</div>
+                    </div>
+                </div>
+
+                <!-- Payroll Calculation Table -->
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full border-collapse border border-slate-300 text-xs">
+                        <thead>
+                            <tr class="bg-slate-900 text-white">
+                                <th class="border border-slate-700 px-2 py-2.5 text-center w-12">ID</th>
+                                <th class="border border-slate-700 px-3 py-2.5 text-left">Staff Name</th>
+                                <th class="border border-slate-700 px-3 py-2.5 text-left">Designation</th>
+                                <th class="border border-slate-700 px-3 py-2.5 text-right">Monthly Base</th>
+                                <th class="border border-slate-700 px-2 py-2.5 text-center">Month Days</th>
+                                <th class="border border-slate-700 px-2 py-2.5 text-center bg-indigo-950 font-bold">Payable Days</th>
+                                <th class="border border-slate-700 px-3 py-2.5 text-right">Earned Basic</th>
+                                <th class="border border-slate-700 px-3 py-2.5 text-right">OT / Allow. (₹)</th>
+                                <th class="border border-slate-700 px-3 py-2.5 text-right font-bold">Gross Pay</th>
+                                <th class="border border-slate-700 px-3 py-2.5 text-right">Deductions (₹)</th>
+                                <th class="border border-slate-700 px-3 py-2.5 text-right bg-emerald-900 font-bold">NET PAYABLE (₹)</th>
+                                <th class="border border-slate-700 px-2 py-2.5 text-center">Mode</th>
+                                <th class="border border-slate-700 px-3 py-2.5 text-center w-28">Signature / Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payrollTableBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                        <tfoot>
+                            <tr class="bg-slate-100 font-bold text-slate-900 text-xs">
+                                <td colspan="3" class="border border-slate-400 px-3 py-3 text-center">TOTAL REMUNERATION</td>
+                                <td id="totMonthlyBase" class="border border-slate-400 px-3 py-3 text-right">₹0.00</td>
+                                <td class="border border-slate-400 px-2 py-3 text-center">-</td>
+                                <td class="border border-slate-400 px-2 py-3 text-center">-</td>
+                                <td id="totEarnedBasic" class="border border-slate-400 px-3 py-3 text-right">₹0.00</td>
+                                <td id="totAllowances" class="border border-slate-400 px-3 py-3 text-right">₹0.00</td>
+                                <td id="totGross" class="border border-slate-400 px-3 py-3 text-right">₹0.00</td>
+                                <td id="totDeductions" class="border border-slate-400 px-3 py-3 text-right">₹0.00</td>
+                                <td id="totNetPayable" class="border border-slate-400 px-3 py-3 text-right text-emerald-700 text-sm bg-emerald-100 font-black">₹0.00</td>
+                                <td colspan="2" class="border border-slate-400"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <!-- Signatures -->
+                <div class="mt-8 pt-6 border-t border-slate-300 flex justify-between items-end text-xs font-semibold text-slate-800">
+                    <div class="text-center w-52">
+                        <div class="border-t border-slate-700 pt-2">Prepared By</div>
+                    </div>
+                    <div class="text-center w-52">
+                        <div class="border-t border-slate-700 pt-2">Verified By (Supervisor)</div>
+                    </div>
+                    <div class="text-center w-52">
+                        <div class="border-t border-slate-700 pt-2">Sanctioned By (Warden / Manager)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 4: INDIVIDUAL SALARY SLIPS / VOUCHERS -->
+        <!-- ========================================================================= -->
+        <section id="tab-payslips" class="tab-content hidden">
+            <div class="mb-4 flex justify-between items-center no-print">
+                <h2 class="text-xl font-bold text-slate-900">Individual Housekeeping Wage Vouchers</h2>
+                <button onclick="window.print()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-indigo-600 text-white rounded-lg shadow-sm hover:bg-indigo-500">
+                    <i data-lucide="printer" class="w-4 h-4"></i> Print Payslips
+                </button>
+            </div>
+
+            <div id="payslipsContainer" class="space-y-6">
+                <!-- Dynamically rendered individual slips -->
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 5: STAFF MANAGEMENT & SETTINGS -->
+        <!-- ========================================================================= -->
+        <section id="tab-staff" class="tab-content hidden">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-200">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Staff Details & Hostel Settings</h2>
+                        <p class="text-xs text-slate-500">Edit staff names, monthly wages, payment info, and hostel details anytime.</p>
+                    </div>
+                    <button onclick="saveStaffSettings()" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 shadow transition">
+                        <i data-lucide="save" class="w-4 h-4"></i> Save All Changes
+                    </button>
+                </div>
+
+                <!-- Hostel Details Form -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6">
+                    <h3 class="font-bold text-sm text-slate-800 mb-3 flex items-center gap-2">
+                        <i data-lucide="home" class="w-4 h-4 text-indigo-600"></i> Hostel Information
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Hostel / Facility Name</label>
+                            <input id="inputHostelName" type="text" value="Sunshine Hostel & Residency" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Shift / Working Hours</label>
+                            <input id="inputShiftHours" type="text" value="07:00 AM – 04:00 PM (General Shift)" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Staff Cards Form -->
+                <div id="staffSettingsCards" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Staff 1, 2, 3 Edit Forms -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="no-print border-t border-slate-200 bg-white py-4 mt-12 text-center text-xs text-slate-500">
+        Hostel Housekeeping Attendance & Remuneration Portal &bull; Designed for Cleanliness, Accountability & Timely Remuneration
+    </footer>
+
+    <!-- App State & Script Logic -->
+    <script>
+        // Initial Default State
+        const DEFAULT_STATE = {
+            hostelName: "Sunshine Hostel & Residency",
+            shiftHours: "07:00 AM – 04:00 PM (General Shift)",
+            selectedMonth: 9, // October (0-indexed: 9 = October)
+            selectedYear: 2026,
+            staff: [
+                {
+                    id: "HK-01",
+                    name: "Ramesh Kumar",
+                    role: "Head Housekeeper / Floors",
+                    phone: "+91 98765 43210",
+                    monthlyWage: 12000,
+                    weeklyOff: "Sunday",
+                    paymentMode: "Bank Transfer",
+                    accountDetails: "A/C: 987654321012, IFSC: SBIN0001234",
+                    allowance: 0,
+                    deduction: 0
+                },
+                {
+                    id: "HK-02",
+                    name: "Sunita Devi",
+                    role: "Housekeeper / Corridors & Rooms",
+                    phone: "+91 98765 43211",
+                    monthlyWage: 10500,
+                    weeklyOff: "Sunday",
+                    paymentMode: "Cash",
+                    accountDetails: "Cash Payment Register",
+                    allowance: 0,
+                    deduction: 0
+                },
+                {
+                    id: "HK-03",
+                    name: "Anil Sharma",
+                    role: "Housekeeper / Washrooms & Common Area",
+                    phone: "+91 98765 43212",
+                    monthlyWage: 10500,
+                    weeklyOff: "Sunday",
+                    paymentMode: "UPI",
+                    accountDetails: "UPI: anilsharma@okaxis",
+                    allowance: 0,
+                    deduction: 0
+                }
+            ],
+            // Attendance stored as { "YYYY-MM": { "HK-01": { 1: "P", 2: "P", ... } } }
+            attendanceRecords: {}
+        };
+
+        // Load State from LocalStorage or Default
+        let state = JSON.parse(localStorage.getItem("hostel_attendance_state")) || DEFAULT_STATE;
+
+        // Ensure current month/year selections are valid
+        if (state.selectedMonth === undefined) state.selectedMonth = new Date().getMonth();
+        if (state.selectedYear === undefined) state.selectedYear = new Date().getFullYear();
+
+        const monthNames = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+        const dayShortNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+        function getDaysInMonth(year, month) {
+            return new Date(year, month + 1, 0).getDate();
+        }
+
+        function getMonthKey() {
+            return `${state.selectedYear}-${String(state.selectedMonth + 1).padStart(2, '0')}`;
+        }
+
+        function initMonthAttendance() {
+            const key = getMonthKey();
+            if (!state.attendanceRecords[key]) {
+                state.attendanceRecords[key] = {};
+            }
+            const daysCount = getDaysInMonth(state.selectedYear, state.selectedMonth);
+
+            state.staff.forEach(emp => {
+                if (!state.attendanceRecords[key][emp.id]) {
+                    state.attendanceRecords[key][emp.id] = {};
+                    for (let d = 1; d <= daysCount; d++) {
+                        const dateObj = new Date(state.selectedYear, state.selectedMonth, d);
+                        const isSunday = dateObj.getDay() === 0;
+                        state.attendanceRecords[key][emp.id][d] = isSunday ? "WO" : "P";
+                    }
+                }
+            });
+            saveState();
+        }
+
+        function saveState() {
+            localStorage.setItem("hostel_attendance_state", JSON.stringify(state));
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll(".tab-content").forEach(el => el.classList.add("hidden"));
+            document.querySelectorAll(".tab-btn").forEach(el => {
+                el.classList.remove("bg-indigo-600", "text-white");
+                el.classList.add("text-slate-300", "hover:text-white", "hover:bg-slate-800");
+            });
+
+            const activeTab = document.getElementById(`tab-${tabId}`);
+            if (activeTab) activeTab.classList.remove("hidden");
+
+            const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.add("bg-indigo-600", "text-white");
+                activeBtn.classList.remove("text-slate-300", "hover:bg-slate-800");
+            }
+            lucide.createIcons();
+        }
+
+        function renderAll() {
+            initMonthAttendance();
+            const totalDays = getDaysInMonth(state.selectedYear, state.selectedMonth);
+            const monthStr = `${monthNames[state.selectedMonth]} ${state.selectedYear}`;
+
+            // Update Header & General Titles
+            document.getElementById("topNavHostelName").innerText = state.hostelName;
+            document.querySelectorAll(".hostel-title-display").forEach(el => el.innerText = state.hostelName);
+            document.querySelectorAll(".current-month-display").forEach(el => el.innerText = monthStr);
+            document.querySelectorAll(".total-days-display").forEach(el => el.innerText = totalDays);
+
+            // Sync Dropdowns
+            document.getElementById("selectMonth").value = state.selectedMonth;
+            document.getElementById("selectYear").value = state.selectedYear;
+
+            // Render Views
+            renderPrintableSignInSheet(totalDays);
+            renderDigitalAttendanceMatrix(totalDays);
+            renderPayroll(totalDays);
+            renderPayslips(totalDays);
+            renderStaffSettings();
+
+            lucide.createIcons();
+        }
+
+        // ==========================================
+        // 1. RENDER PRINTABLE SIGN-IN REGISTER
+        // ==========================================
+        function renderPrintableSignInSheet(totalDays) {
+            // Update table headers with staff names
+            state.staff.forEach((emp, idx) => {
+                const headerEl = document.querySelector(`.staff-header-${idx + 1}`);
+                if (headerEl) {
+                    headerEl.innerHTML = `<strong>${emp.name}</strong><br><span class="text-[10px] text-slate-300">(${emp.id} &bull; ${emp.role.split('/')[0]})</span>`;
+                }
+            });
+
+            const tbody = document.getElementById("printableSignInTableBody");
+            let rowsHtml = "";
+
+            for (let d = 1; d <= totalDays; d++) {
+                const dateObj = new Date(state.selectedYear, state.selectedMonth, d);
+                const dayName = dayShortNames[dateObj.getDay()];
+                const isSunday = dateObj.getDay() === 0;
+                const rowBg = isSunday ? "bg-rose-50/60 font-semibold text-rose-900" : (d % 2 === 0 ? "bg-slate-50/50" : "bg-white");
+
+                let staffCells = "";
+                state.staff.forEach(emp => {
+                    if (isSunday) {
+                        staffCells += `
+                            <td class="border border-slate-300 px-1 py-1.5 text-center text-[10px] text-rose-600 bg-rose-50">OFF</td>
+                            <td class="border border-slate-300 px-1 py-1.5 text-center text-[10px] text-rose-600 bg-rose-50">OFF</td>
+                            <td class="border border-slate-300 px-1 py-1.5 text-center text-[10px] font-bold text-rose-600 bg-rose-50">WO</td>
+                        `;
+                    } else {
+                        staffCells += `
+                            <td class="border border-slate-300 h-7 text-center"></td>
+                            <td class="border border-slate-300 h-7 text-center"></td>
+                            <td class="border border-slate-300 h-7 text-center"></td>
+                        `;
+                    }
+                });
+
+                rowsHtml += `
+                    <tr class="${rowBg}">
+                        <td class="border border-slate-400 px-1 py-1 text-center font-bold">${d}</td>
+                        <td class="border border-slate-400 px-1 py-1 text-center">${dayName}</td>
+                        ${staffCells}
+                    </tr>
+                `;
+            }
+            tbody.innerHTML = rowsHtml;
+        }
+
+        // ==========================================
+        // 2. RENDER DIGITAL ATTENDANCE MATRIX
+        // ==========================================
+        function renderDigitalAttendanceMatrix(totalDays) {
+            const key = getMonthKey();
+            const recs = state.attendanceRecords[key] || {};
+
+            // Render Subheader days
+            const subHeader = document.getElementById("matrixSubHeaderDays");
+            let subHtml = '<th class="border border-slate-300 px-2 py-1 sticky left-0 bg-slate-100 z-10 text-left">Staff Name</th><th class="border border-slate-300 px-2 py-1 text-left">Designation</th>';
+            for (let d = 1; d <= totalDays; d++) {
+                const dateObj = new Date(state.selectedYear, state.selectedMonth, d);
+                const dayName = dayShortNames[dateObj.getDay()][0];
+                const isSun = dateObj.getDay() === 0;
+                subHtml += `<th class="border border-slate-300 px-1 py-1 w-7 text-center ${isSun ? 'bg-rose-100 text-rose-800' : ''}">${d}<br><span class="text-[9px] font-normal">${dayName}</span></th>`;
+            }
+            subHtml += '<th colspan="6" class="border border-slate-300 px-2 py-1 bg-slate-200">Summary</th>';
+            subHeader.innerHTML = subHtml;
+
+            // Render Staff Rows
+            const tbody = document.getElementById("digitalMatrixTableBody");
+            let rowsHtml = "";
+
+            state.staff.forEach(emp => {
+                const empAtt = (recs[emp.id]) || {};
+                let pCount = 0, hdCount = 0, woCount = 0, plCount = 0, aCount = 0;
+
+                let dayCells = "";
+                for (let d = 1; d <= totalDays; d++) {
+                    const status = empAtt[d] || "P";
+                    const dateObj = new Date(state.selectedYear, state.selectedMonth, d);
+                    const isSun = dateObj.getDay() === 0;
+
+                    if (status === "P") pCount += 1;
+                    else if (status === "HD") hdCount += 1;
+                    else if (status === "WO") woCount += 1;
+                    else if (status === "PL") plCount += 1;
+                    else if (status === "A") aCount += 1;
+
+                    let badgeClass = "bg-emerald-100 text-emerald-800 font-bold";
+                    if (status === "HD") badgeClass = "bg-amber-100 text-amber-800 font-bold";
+                    if (status === "WO") badgeClass = "bg-purple-100 text-purple-800 font-bold";
+                    if (status === "PL") badgeClass = "bg-blue-100 text-blue-800 font-bold";
+                    if (status === "A") badgeClass = "bg-rose-100 text-rose-800 font-bold";
+
+                    dayCells += `
+                        <td onclick="toggleDayAttendance('${emp.id}', ${d})" title="Click to cycle attendance"
+                            class="border border-slate-300 p-0.5 cursor-pointer hover:scale-110 transition ${isSun ? 'bg-rose-50/40' : ''}">
+                            <div class="rounded py-1 text-[11px] ${badgeClass}">${status}</div>
+                        </td>
+                    `;
+                }
+
+                const payableDays = (pCount + (hdCount * 0.5) + woCount + plCount);
+
+                rowsHtml += `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="border border-slate-300 px-3 py-2 font-bold text-left sticky left-0 bg-white z-10 text-slate-900 shadow-sm">${emp.name}</td>
+                        <td class="border border-slate-300 px-2 py-2 text-left text-slate-600 text-[11px]">${emp.role}</td>
+                        ${dayCells}
+                        <td class="border border-slate-300 px-2 py-2 font-bold text-emerald-700 bg-emerald-50">${pCount}</td>
+                        <td class="border border-slate-300 px-2 py-2 font-bold text-amber-700 bg-amber-50">${hdCount}</td>
+                        <td class="border border-slate-300 px-2 py-2 font-bold text-purple-700 bg-purple-50">${woCount}</td>
+                        <td class="border border-slate-300 px-2 py-2 font-bold text-blue-700 bg-blue-50">${plCount}</td>
+                        <td class="border border-slate-300 px-2 py-2 font-bold text-rose-700 bg-rose-50">${aCount}</td>
+                        <td class="border border-slate-300 px-2 py-2 font-black text-indigo-900 bg-indigo-50 text-sm">${payableDays.toFixed(1)}</td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = rowsHtml;
+        }
+
+        function toggleDayAttendance(empId, day) {
+            const key = getMonthKey();
+            const current = state.attendanceRecords[key][empId][day] || "P";
+            const order = ["P", "HD", "WO", "PL", "A"];
+            const nextIdx = (order.indexOf(current) + 1) % order.length;
+            state.attendanceRecords[key][empId][day] = order[nextIdx];
+            saveState();
+            renderAll();
+        }
+
+        function markAllPresent() {
+            const key = getMonthKey();
+            const totalDays = getDaysInMonth(state.selectedYear, state.selectedMonth);
+            state.staff.forEach(emp => {
+                for (let d = 1; d <= totalDays; d++) {
+                    const dateObj = new Date(state.selectedYear, state.selectedMonth, d);
+                    state.attendanceRecords[key][emp.id][d] = (dateObj.getDay() === 0) ? "WO" : "P";
+                }
+            });
+            saveState();
+            renderAll();
+        }
+
+        function resetAttendance() {
+            if (confirm("Are you sure you want to reset attendance for this month?")) {
+                const key = getMonthKey();
+                delete state.attendanceRecords[key];
+                initMonthAttendance();
+                renderAll();
+            }
+        }
+
+        // ==========================================
+        // 3. RENDER MONTHLY REMUNERATION & PAYROLL
+        // ==========================================
+        function calculateStaffPayableDays(empId, totalDays) {
+            const key = getMonthKey();
+            const att = (state.attendanceRecords[key] && state.attendanceRecords[key][empId]) || {};
+            let p = 0, hd = 0, wo = 0, pl = 0;
+            for (let d = 1; d <= totalDays; d++) {
+                const s = att[d] || "P";
+                if (s === "P") p += 1;
+                else if (s === "HD") hd += 1;
+                else if (s === "WO") wo += 1;
+                else if (s === "PL") pl += 1;
+            }
+            return p + (hd * 0.5) + wo + pl;
+        }
+
+        function renderPayroll(totalDays) {
+            const tbody = document.getElementById("payrollTableBody");
+            let rowsHtml = "";
+
+            let totalBase = 0, totalEarned = 0, totalAllow = 0, totalGross = 0, totalDed = 0, totalNet = 0;
+
+            state.staff.forEach((emp, index) => {
+                const payableDays = calculateStaffPayableDays(emp.id, totalDays);
+                const dailyRate = emp.monthlyWage / totalDays;
+                const earnedBasic = Math.round(dailyRate * payableDays);
+                const allowance = Number(emp.allowance || 0);
+                const grossPay = earnedBasic + allowance;
+                const deduction = Number(emp.deduction || 0);
+                const netPayable = Math.max(0, grossPay - deduction);
+
+                totalBase += emp.monthlyWage;
+                totalEarned += earnedBasic;
+                totalAllow += allowance;
+                totalGross += grossPay;
+                totalDed += deduction;
+                totalNet += netPayable;
+
+                // Sync with Printable Sign-in sheet footer
+                const totPresEl = document.querySelector(`.staff-total-pres-${index + 1}`);
+                if (totPresEl) totPresEl.innerText = `${payableDays.toFixed(1)} Days`;
+
+                rowsHtml += `
+                    <tr class="hover:bg-slate-50 transition font-medium">
+                        <td class="border border-slate-300 px-2 py-2 text-center font-bold text-slate-700">${emp.id}</td>
+                        <td class="border border-slate-300 px-3 py-2 font-bold text-slate-900">${emp.name}</td>
+                        <td class="border border-slate-300 px-3 py-2 text-slate-600">${emp.role}</td>
+                        <td class="border border-slate-300 px-3 py-2 text-right">₹${emp.monthlyWage.toLocaleString('en-IN')}.00</td>
+                        <td class="border border-slate-300 px-2 py-2 text-center">${totalDays}</td>
+                        <td class="border border-slate-300 px-2 py-2 text-center font-bold text-indigo-700 bg-indigo-50/50">${payableDays.toFixed(1)}</td>
+                        <td class="border border-slate-300 px-3 py-2 text-right font-semibold">₹${earnedBasic.toLocaleString('en-IN')}.00</td>
+                        <td class="border border-slate-300 px-2 py-1 text-right">
+                            <input type="number" min="0" value="${allowance}" onchange="updateStaffFinancial('${emp.id}', 'allowance', this.value)"
+                                class="w-20 px-2 py-1 text-right text-xs border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500">
+                        </td>
+                        <td class="border border-slate-300 px-3 py-2 text-right font-bold text-slate-800">₹${grossPay.toLocaleString('en-IN')}.00</td>
+                        <td class="border border-slate-300 px-2 py-1 text-right">
+                            <input type="number" min="0" value="${deduction}" onchange="updateStaffFinancial('${emp.id}', 'deduction', this.value)"
+                                class="w-20 px-2 py-1 text-right text-xs border border-slate-300 rounded text-rose-600 focus:ring-1 focus:ring-rose-500">
+                        </td>
+                        <td class="border border-slate-300 px-3 py-2 text-right font-black text-emerald-800 bg-emerald-50 text-sm">₹${netPayable.toLocaleString('en-IN')}.00</td>
+                        <td class="border border-slate-300 px-2 py-2 text-center text-[11px]">${emp.paymentMode}</td>
+                        <td class="border border-slate-300 px-2 py-2 text-center"></td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = rowsHtml;
+
+            // Update Totals
+            document.getElementById("totMonthlyBase").innerText = `₹${totalBase.toLocaleString('en-IN')}.00`;
+            document.getElementById("totEarnedBasic").innerText = `₹${totalEarned.toLocaleString('en-IN')}.00`;
+            document.getElementById("totAllowances").innerText = `₹${totalAllow.toLocaleString('en-IN')}.00`;
+            document.getElementById("totGross").innerText = `₹${totalGross.toLocaleString('en-IN')}.00`;
+            document.getElementById("totDeductions").innerText = `₹${totalDed.toLocaleString('en-IN')}.00`;
+            document.getElementById("totNetPayable").innerText = `₹${totalNet.toLocaleString('en-IN')}.00`;
+            document.getElementById("payrollCardTotalNet").innerText = `₹${totalNet.toLocaleString('en-IN')}.00`;
+        }
+
+        function updateStaffFinancial(empId, field, value) {
+            const emp = state.staff.find(e => e.id === empId);
+            if (emp) {
+                emp[field] = parseFloat(value) || 0;
+                saveState();
+                renderAll();
+            }
+        }
+
+        // ==========================================
+        // 4. RENDER INDIVIDUAL SALARY SLIPS / VOUCHERS
+        // ==========================================
+        function renderPayslips(totalDays) {
+            const container = document.getElementById("payslipsContainer");
+            const monthStr = `${monthNames[state.selectedMonth]} ${state.selectedYear}`;
+            let html = "";
+
+            state.staff.forEach(emp => {
+                const payableDays = calculateStaffPayableDays(emp.id, totalDays);
+                const dailyRate = emp.monthlyWage / totalDays;
+                const earnedBasic = Math.round(dailyRate * payableDays);
+                const allowance = Number(emp.allowance || 0);
+                const grossPay = earnedBasic + allowance;
+                const deduction = Number(emp.deduction || 0);
+                const netPayable = Math.max(0, grossPay - deduction);
+
+                html += `
+                    <div class="bg-white p-6 rounded-xl border-2 border-slate-300 shadow-sm print-landscape page-break">
+                        <div class="text-center pb-3 border-b border-slate-200">
+                            <h3 class="font-black text-lg text-slate-900 uppercase tracking-wide">${state.hostelName}</h3>
+                            <p class="text-xs font-semibold text-slate-600">Housekeeping Remuneration Voucher &bull; <strong>${monthStr}</strong></p>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 my-4 bg-slate-50 p-3 rounded-lg text-xs">
+                            <div><strong>Staff ID:</strong> ${emp.id}</div>
+                            <div><strong>Payment Month:</strong> ${monthStr}</div>
+                            <div><strong>Staff Name:</strong> <span class="font-bold text-slate-900">${emp.name}</span></div>
+                            <div><strong>Payable Days:</strong> ${payableDays.toFixed(1)} / ${totalDays} Days</div>
+                            <div><strong>Designation:</strong> ${emp.role}</div>
+                            <div><strong>Payment Mode:</strong> ${emp.paymentMode}</div>
+                            <div><strong>Contact:</strong> ${emp.phone}</div>
+                            <div><strong>A/c / UPI Info:</strong> ${emp.accountDetails}</div>
+                        </div>
+
+                        <table class="w-full border border-slate-300 text-xs mb-4">
+                            <thead>
+                                <tr class="bg-slate-800 text-white">
+                                    <th class="border border-slate-700 px-3 py-2 text-left">Earnings Head</th>
+                                    <th class="border border-slate-700 px-3 py-2 text-right">Amount (₹)</th>
+                                    <th class="border border-slate-700 px-3 py-2 text-left">Deductions / Advance</th>
+                                    <th class="border border-slate-700 px-3 py-2 text-right">Amount (₹)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="border border-slate-300 px-3 py-1.5">Monthly Base Wage</td>
+                                    <td class="border border-slate-300 px-3 py-1.5 text-right">₹${emp.monthlyWage.toLocaleString('en-IN')}.00</td>
+                                    <td class="border border-slate-300 px-3 py-1.5">Salary Advance / Loan</td>
+                                    <td class="border border-slate-300 px-3 py-1.5 text-right">₹${deduction.toLocaleString('en-IN')}.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-slate-300 px-3 py-1.5 font-medium">Earned Basic Remuneration</td>
+                                    <td class="border border-slate-300 px-3 py-1.5 text-right font-medium">₹${earnedBasic.toLocaleString('en-IN')}.00</td>
+                                    <td class="border border-slate-300 px-3 py-1.5">Loss of Pay / Unpaid Absence</td>
+                                    <td class="border border-slate-300 px-3 py-1.5 text-right">₹0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-slate-300 px-3 py-1.5">Overtime / Special Allowance</td>
+                                    <td class="border border-slate-300 px-3 py-1.5 text-right">₹${allowance.toLocaleString('en-IN')}.00</td>
+                                    <td class="border border-slate-300 px-3 py-1.5">Other Penalties / Deductions</td>
+                                    <td class="border border-slate-300 px-3 py-1.5 text-right">₹0.00</td>
+                                </tr>
+                                <tr class="bg-slate-100 font-bold">
+                                    <td class="border border-slate-300 px-3 py-2">Total Gross Earnings</td>
+                                    <td class="border border-slate-300 px-3 py-2 text-right">₹${grossPay.toLocaleString('en-IN')}.00</td>
+                                    <td class="border border-slate-300 px-3 py-2">Total Deductions</td>
+                                    <td class="border border-slate-300 px-3 py-2 text-right">₹${deduction.toLocaleString('en-IN')}.00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="flex justify-between items-center bg-emerald-50 border border-emerald-300 p-3 rounded-lg text-emerald-900 font-bold">
+                            <span class="text-xs uppercase tracking-wide">NET REMUNERATION DISBURSED:</span>
+                            <span class="text-xl font-black">₹${netPayable.toLocaleString('en-IN')}.00</span>
+                        </div>
+
+                        <div class="mt-8 pt-6 border-t border-slate-300 flex justify-between text-xs font-semibold text-slate-800">
+                            <div class="text-center w-56 border-t border-dashed border-slate-600 pt-1">
+                                Staff Signature (Recipient)
+                            </div>
+                            <div class="text-center w-56 border-t border-dashed border-slate-600 pt-1">
+                                Warden / Authorised Signatory
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // ==========================================
+        // 5. RENDER STAFF SETTINGS
+        // ==========================================
+        function renderStaffSettings() {
+            document.getElementById("inputHostelName").value = state.hostelName;
+            document.getElementById("inputShiftHours").value = state.shiftHours;
+
+            const cardsContainer = document.getElementById("staffSettingsCards");
+            let html = "";
+
+            state.staff.forEach((emp, index) => {
+                html += `
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <div class="flex items-center justify-between mb-3 border-b border-slate-200 pb-2">
+                            <span class="font-bold text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded">Staff ${index + 1} (${emp.id})</span>
+                            <span class="text-xs text-slate-500">Active</span>
+                        </div>
+
+                        <div class="space-y-3 text-xs">
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Full Name</label>
+                                <input type="text" id="staff_name_${index}" value="${emp.name}" class="w-full px-2.5 py-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Role / Designation</label>
+                                <input type="text" id="staff_role_${index}" value="${emp.role}" class="w-full px-2.5 py-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Monthly Base Wage (₹)</label>
+                                <input type="number" id="staff_wage_${index}" value="${emp.monthlyWage}" class="w-full px-2.5 py-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500 font-bold">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Contact Number</label>
+                                <input type="text" id="staff_phone_${index}" value="${emp.phone}" class="w-full px-2.5 py-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Payment Method</label>
+                                <select id="staff_mode_${index}" class="w-full px-2.5 py-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500 bg-white">
+                                    <option value="Bank Transfer" ${emp.paymentMode === 'Bank Transfer' ? 'selected' : ''}>Bank Transfer / NEFT</option>
+                                    <option value="UPI" ${emp.paymentMode === 'UPI' ? 'selected' : ''}>UPI / GPay / PhonePe</option>
+                                    <option value="Cash" ${emp.paymentMode === 'Cash' ? 'selected' : ''}>Cash in Hand</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Bank A/C or UPI ID</label>
+                                <input type="text" id="staff_acc_${index}" value="${emp.accountDetails}" class="w-full px-2.5 py-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500">
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            cardsContainer.innerHTML = html;
+        }
+
+        function saveStaffSettings() {
+            state.hostelName = document.getElementById("inputHostelName").value.trim() || "Hostel";
+            state.shiftHours = document.getElementById("inputShiftHours").value.trim();
+
+            state.staff.forEach((emp, index) => {
+                emp.name = document.getElementById(`staff_name_${index}`).value.trim() || emp.name;
+                emp.role = document.getElementById(`staff_role_${index}`).value.trim() || emp.role;
+                emp.monthlyWage = parseFloat(document.getElementById(`staff_wage_${index}`).value) || emp.monthlyWage;
+                emp.phone = document.getElementById(`staff_phone_${index}`).value.trim() || emp.phone;
+                emp.paymentMode = document.getElementById(`staff_mode_${index}`).value;
+                emp.accountDetails = document.getElementById(`staff_acc_${index}`).value.trim() || emp.accountDetails;
+            });
+
+            saveState();
+            renderAll();
+            alert("Settings and staff profiles saved successfully!");
+        }
+
+        // ==========================================
+        // EXPORT TO EXCEL IN BROWSER
+        // ==========================================
+        function exportToExcel() {
+            const totalDays = getDaysInMonth(state.selectedYear, state.selectedMonth);
+            const monthStr = `${monthNames[state.selectedMonth]}_${state.selectedYear}`;
+            const key = getMonthKey();
+
+            // 1. Staff Master
+            const staffData = [
+                ["Staff ID", "Full Name", "Designation", "Contact No.", "Monthly Base (₹)", "Payment Mode", "Bank / UPI Details"]
+            ];
+            state.staff.forEach(emp => {
+                staffData.push([emp.id, emp.name, emp.role, emp.phone, emp.monthlyWage, emp.paymentMode, emp.accountDetails]);
+            });
+
+            // 2. Remuneration
+            const payData = [
+                ["Staff ID", "Staff Name", "Role", "Monthly Base (₹)", "Days in Month", "Payable Days", "Earned Basic (₹)", "Allowances (₹)", "Gross Pay (₹)", "Deductions (₹)", "Net Payable (₹)", "Mode"]
+            ];
+            state.staff.forEach(emp => {
+                const payableDays = calculateStaffPayableDays(emp.id, totalDays);
+                const dailyRate = emp.monthlyWage / totalDays;
+                const earnedBasic = Math.round(dailyRate * payableDays);
+                const allowance = Number(emp.allowance || 0);
+                const grossPay = earnedBasic + allowance;
+                const deduction = Number(emp.deduction || 0);
+                const netPayable = Math.max(0, grossPay - deduction);
+
+                payData.push([
+                    emp.id, emp.name, emp.role, emp.monthlyWage, totalDays, payableDays,
+                    earnedBasic, allowance, grossPay, deduction, netPayable, emp.paymentMode
+                ]);
+            });
+
+            // Create workbook with SheetJS
+            const wb = XLSX.utils.book_new();
+            const wsStaff = XLSX.utils.aoa_to_sheet(staffData);
+            const wsPay = XLSX.utils.aoa_to_sheet(payData);
+
+            XLSX.utils.book_append_sheet(wb, wsStaff, "Staff_Directory");
+            XLSX.utils.book_append_sheet(wb, wsPay, "Monthly_Remuneration");
+
+            XLSX.writeFile(wb, `Hostel_Housekeeping_Attendance_${monthStr}.xlsx`);
+        }
+
+        // Month / Year Change Event Handlers
+        document.getElementById("selectMonth").addEventListener("change", function(e) {
+            state.selectedMonth = parseInt(e.target.value);
+            saveState();
+            renderAll();
+        });
+
+        document.getElementById("selectYear").addEventListener("change", function(e) {
+            state.selectedYear = parseInt(e.target.value);
+            saveState();
+            renderAll();
+        });
+
+        // Initialize on load
+        window.onload = function() {
+            renderAll();
+        };
+    </script>
+</body>
+</html>

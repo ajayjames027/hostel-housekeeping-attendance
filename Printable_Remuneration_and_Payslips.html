@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Housekeeping Remuneration & Payslips - October 2026</title>
+<style>
+    @page {
+        size: A4 portrait;
+        margin: 10mm;
+    }
+    body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        margin: 0;
+        padding: 15px;
+        color: #333;
+        background-color: #fcfcfc;
+    }
+    .header {
+        text-align: center;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #1f497d;
+        padding-bottom: 10px;
+    }
+    .header h1 {
+        margin: 0;
+        font-size: 22px;
+        color: #1f497d;
+        text-transform: uppercase;
+    }
+    .header h2 {
+        margin: 5px 0 0 0;
+        font-size: 15px;
+        color: #555;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 25px;
+        font-size: 12px;
+    }
+    th, td {
+        border: 1px solid #777;
+        padding: 6px 8px;
+    }
+    th {
+        background-color: #1f497d;
+        color: white;
+    }
+    .payslip-card {
+        border: 2px solid #1f497d;
+        border-radius: 6px;
+        padding: 15px;
+        margin-bottom: 25px;
+        background: white;
+        page-break-inside: avoid;
+    }
+    .slip-header {
+        text-align: center;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 6px;
+        margin-bottom: 10px;
+    }
+    .slip-header h3 {
+        margin: 0;
+        color: #1f497d;
+        font-size: 16px;
+    }
+    .slip-header p {
+        margin: 3px 0 0 0;
+        font-size: 12px;
+        color: #555;
+    }
+    .slip-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px 20px;
+        font-size: 12px;
+        margin-bottom: 12px;
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 4px;
+    }
+    .slip-calc-table {
+        margin-bottom: 10px;
+        font-size: 11px;
+    }
+    .slip-calc-table th {
+        background-color: #4f81bd;
+    }
+    .slip-total-row {
+        background: #f1f5f9;
+    }
+    .net-pay-box {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #e8f5e9;
+        border: 1px solid #81c784;
+        padding: 10px 15px;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 14px;
+        color: #1b5e20;
+    }
+    .net-amount {
+        font-size: 18px;
+    }
+    .slip-signatures {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 25px;
+        font-size: 11px;
+        font-weight: 600;
+        text-align: center;
+    }
+    .slip-signatures div {
+        width: 220px;
+        border-top: 1px dashed #444;
+        padding-top: 4px;
+    }
+    @media print {
+        .no-print { display: none; }
+        body { background: white; padding: 0; }
+    }
+</style>
+</head>
+<body>
+
+<div class="no-print" style="margin-bottom: 15px; text-align: right;">
+    <button onclick="window.print()" style="background: #1f497d; color: white; border: none; padding: 8px 16px; font-size: 14px; border-radius: 4px; cursor: pointer;">🖨️ Print Remuneration Sheet & Payslips</button>
+</div>
+
+<div class="header">
+    <h1>SUNSHINE HOSTEL & RESIDENCY</h1>
+    <h2>Monthly Housekeeping Wage Disbursement Register | <strong>OCTOBER 2026</strong></h2>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Staff Name</th>
+            <th>Designation</th>
+            <th>Monthly Base</th>
+            <th>Days</th>
+            <th>Payable</th>
+            <th>Earned Wage</th>
+            <th>OT / Allow.</th>
+            <th>Deductions</th>
+            <th>Net Payable</th>
+            <th>Mode</th>
+            <th>Recipient Signature</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr>
+            <td style="text-align: center; font-weight: bold;">HK-01</td>
+            <td style="font-weight: bold;">Ramesh Kumar</td>
+            <td>Head Housekeeper / Floors</td>
+            <td style="text-align: right;">₹12,000.00</td>
+            <td style="text-align: center;">31</td>
+            <td style="text-align: center; font-weight: bold; background: #f0f7ff;">31</td>
+            <td style="text-align: right; font-weight: bold;">₹12,000.00</td>
+            <td style="text-align: right;">₹0.00</td>
+            <td style="text-align: right;">₹0.00</td>
+            <td style="text-align: right; font-weight: bold; color: #1b5e20; background: #e8f5e9;">₹12,000.00</td>
+            <td style="text-align: center;">Bank Transfer / UPI</td>
+            <td style="height: 35px;"></td>
+        </tr>
+        
+        <tr>
+            <td style="text-align: center; font-weight: bold;">HK-02</td>
+            <td style="font-weight: bold;">Sunita Devi</td>
+            <td>Housekeeper / Rooms & Corridors</td>
+            <td style="text-align: right;">₹10,500.00</td>
+            <td style="text-align: center;">31</td>
+            <td style="text-align: center; font-weight: bold; background: #f0f7ff;">31</td>
+            <td style="text-align: right; font-weight: bold;">₹10,500.00</td>
+            <td style="text-align: right;">₹0.00</td>
+            <td style="text-align: right;">₹0.00</td>
+            <td style="text-align: right; font-weight: bold; color: #1b5e20; background: #e8f5e9;">₹10,500.00</td>
+            <td style="text-align: center;">Cash / Hand</td>
+            <td style="height: 35px;"></td>
+        </tr>
+        
+        <tr>
+            <td style="text-align: center; font-weight: bold;">HK-03</td>
+            <td style="font-weight: bold;">Anil Sharma</td>
+            <td>Housekeeper / Washrooms & Common Areas</td>
+            <td style="text-align: right;">₹10,500.00</td>
+            <td style="text-align: center;">31</td>
+            <td style="text-align: center; font-weight: bold; background: #f0f7ff;">31</td>
+            <td style="text-align: right; font-weight: bold;">₹10,500.00</td>
+            <td style="text-align: right;">₹0.00</td>
+            <td style="text-align: right;">₹0.00</td>
+            <td style="text-align: right; font-weight: bold; color: #1b5e20; background: #e8f5e9;">₹10,500.00</td>
+            <td style="text-align: center;">UPI</td>
+            <td style="height: 35px;"></td>
+        </tr>
+        
+        <tr style="font-weight: bold; background: #eef2f7;">
+            <td colspan="3" style="text-align: center;">TOTAL DISBURSEMENT</td>
+            <td style="text-align: right;">-</td>
+            <td style="text-align: center;">-</td>
+            <td style="text-align: center;">-</td>
+            <td style="text-align: right;">₹33,000.00</td>
+            <td style="text-align: right;">₹0.00</td>
+            <td style="text-align: right;">₹0.00</td>
+            <td style="text-align: right; color: #1b5e20; font-size: 13px; background: #d4edda;">₹33,000.00</td>
+            <td colspan="2"></td>
+        </tr>
+    </tbody>
+</table>
+
+<h2 style="color: #1f497d; font-size: 16px; margin: 30px 0 15px 0; border-bottom: 1px solid #1f497d; padding-bottom: 5px;">
+    Individual Staff Remuneration Vouchers (Signed Acknowledgements)
+</h2>
+
+
+        <div class="payslip-card">
+            <div class="slip-header">
+                <h3>SUNSHINE HOSTEL & RESIDENCY</h3>
+                <p>Housekeeping Remuneration Voucher | <strong>October 2026</strong></p>
+            </div>
+            
+            <div class="slip-grid">
+                <div><strong>Staff ID:</strong> HK-01</div>
+                <div><strong>Month / Year:</strong> October 2026</div>
+                <div><strong>Staff Name:</strong> Ramesh Kumar</div>
+                <div><strong>Payable Days:</strong> 31 / 31 Days</div>
+                <div><strong>Designation:</strong> Head Housekeeper / Floors</div>
+                <div><strong>Payment Mode:</strong> Bank Transfer / UPI</div>
+                <div><strong>Contact:</strong> +91 98765 43210</div>
+                <div><strong>A/c or UPI:</strong> A/C: 987654321012, IFSC: SBIN0001234</div>
+            </div>
+
+            <table class="slip-calc-table">
+                <thead>
+                    <tr>
+                        <th>Earnings Component</th>
+                        <th style="text-align: right;">Amount (₹)</th>
+                        <th>Deductions / Advance</th>
+                        <th style="text-align: right;">Amount (₹)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Monthly Base Wage</td>
+                        <td style="text-align: right;">₹12,000.00</td>
+                        <td>Salary Advance / Loan</td>
+                        <td style="text-align: right;">₹0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Earned Basic Remuneration</td>
+                        <td style="text-align: right; font-weight: bold;">₹12,000.00</td>
+                        <td>Loss of Pay / Absenteeism</td>
+                        <td style="text-align: right;">₹0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Overtime / Festival Allowance</td>
+                        <td style="text-align: right;">₹0.00</td>
+                        <td>Other Deductions</td>
+                        <td style="text-align: right;">₹0.00</td>
+                    </tr>
+                    <tr class="slip-total-row">
+                        <td><strong>Total Gross Earnings</strong></td>
+                        <td style="text-align: right; font-weight: bold;">₹12,000.00</td>
+                        <td><strong>Total Deductions</strong></td>
+                        <td style="text-align: right; font-weight: bold;">₹0.00</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="net-pay-box">
+                <span>NET PAYABLE AMOUNT:</span>
+                <span class="net-amount">₹12,000.00</span>
+            </div>
+
+            <div class="slip-signatures">
+                <div>
+                    <br><br>
+                    <span>Staff Signature (Acknowledgement)</span>
+                </div>
+                <div>
+                    <br><br>
+                    <span>Hostel Warden / Authorised Signatory</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="payslip-card">
+            <div class="slip-header">
+                <h3>SUNSHINE HOSTEL & RESIDENCY</h3>
+                <p>Housekeeping Remuneration Voucher | <strong>October 2026</strong></p>
+            </div>
+            
+            <div class="slip-grid">
+                <div><strong>Staff ID:</strong> HK-02</div>
+                <div><strong>Month / Year:</strong> October 2026</div>
+                <div><strong>Staff Name:</strong> Sunita Devi</div>
+                <div><strong>Payable Days:</strong> 31 / 31 Days</div>
+                <div><strong>Designation:</strong> Housekeeper / Rooms & Corridors</div>
+                <div><strong>Payment Mode:</strong> Cash / Hand</div>
+                <div><strong>Contact:</strong> +91 98765 43211</div>
+                <div><strong>A/c or UPI:</strong> Cash Payment Register</div>
+            </div>
+
+            <table class="slip-calc-table">
+                <thead>
+                    <tr>
+                        <th>Earnings Component</th>
+                        <th style="text-align: right;">Amount (₹)</th>
+                        <th>Deductions / Advance</th>
+                        <th style="text-align: right;">Amount (₹)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Monthly Base Wage</td>
+                        <td style="text-align: right;">₹10,500.00</td>
+                        <td>Salary Advance / Loan</td>
+                        <td style="text-align: right;">₹0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Earned Basic Remuneration</td>
+                        <td style="text-align: right; font-weight: bold;">₹10,500.00</td>
+                        <td>Loss of Pay / Absenteeism</td>
+                        <td style="text-align: right;">₹0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Overtime / Festival Allowance</td>
+                        <td style="text-align: right;">₹0.00</td>
+                        <td>Other Deductions</td>
+                        <td style="text-align: right;">₹0.00</td>
+                    </tr>
+                    <tr class="slip-total-row">
+                        <td><strong>Total Gross Earnings</strong></td>
+                        <td style="text-align: right; font-weight: bold;">₹10,500.00</td>
+                        <td><strong>Total Deductions</strong></td>
+                        <td style="text-align: right; font-weight: bold;">₹0.00</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="net-pay-box">
+                <span>NET PAYABLE AMOUNT:</span>
+                <span class="net-amount">₹10,500.00</span>
+            </div>
+
+            <div class="slip-signatures">
+                <div>
+                    <br><br>
+                    <span>Staff Signature (Acknowledgement)</span>
+                </div>
+                <div>
+                    <br><br>
+                    <span>Hostel Warden / Authorised Signatory</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="payslip-card">
+            <div class="slip-header">
+                <h3>SUNSHINE HOSTEL & RESIDENCY</h3>
+                <p>Housekeeping Remuneration Voucher | <strong>October 2026</strong></p>
+            </div>
+            
+            <div class="slip-grid">
+                <div><strong>Staff ID:</strong> HK-03</div>
+                <div><strong>Month / Year:</strong> October 2026</div>
+                <div><strong>Staff Name:</strong> Anil Sharma</div>
+                <div><strong>Payable Days:</strong> 31 / 31 Days</div>
+                <div><strong>Designation:</strong> Housekeeper / Washrooms & Common Areas</div>
+                <div><strong>Payment Mode:</strong> UPI</div>
+                <div><strong>Contact:</strong> +91 98765 43212</div>
+                <div><strong>A/c or UPI:</strong> UPI ID: anilsharma@okaxis</div>
+            </div>
+
+            <table class="slip-calc-table">
+                <thead>
+                    <tr>
+                        <th>Earnings Component</th>
+                        <th style="text-align: right;">Amount (₹)</th>
+                        <th>Deductions / Advance</th>
+                        <th style="text-align: right;">Amount (₹)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Monthly Base Wage</td>
+                        <td style="text-align: right;">₹10,500.00</td>
+                        <td>Salary Advance / Loan</td>
+                        <td style="text-align: right;">₹0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Earned Basic Remuneration</td>
+                        <td style="text-align: right; font-weight: bold;">₹10,500.00</td>
+                        <td>Loss of Pay / Absenteeism</td>
+                        <td style="text-align: right;">₹0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Overtime / Festival Allowance</td>
+                        <td style="text-align: right;">₹0.00</td>
+                        <td>Other Deductions</td>
+                        <td style="text-align: right;">₹0.00</td>
+                    </tr>
+                    <tr class="slip-total-row">
+                        <td><strong>Total Gross Earnings</strong></td>
+                        <td style="text-align: right; font-weight: bold;">₹10,500.00</td>
+                        <td><strong>Total Deductions</strong></td>
+                        <td style="text-align: right; font-weight: bold;">₹0.00</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="net-pay-box">
+                <span>NET PAYABLE AMOUNT:</span>
+                <span class="net-amount">₹10,500.00</span>
+            </div>
+
+            <div class="slip-signatures">
+                <div>
+                    <br><br>
+                    <span>Staff Signature (Acknowledgement)</span>
+                </div>
+                <div>
+                    <br><br>
+                    <span>Hostel Warden / Authorised Signatory</span>
+                </div>
+            </div>
+        </div>
+        
+
+</body>
+</html>
